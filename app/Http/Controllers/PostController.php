@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use Exception;
 use Illuminate\Http\Request;
+use Throwable;
 
 class PostController extends Controller
 {
@@ -14,7 +16,7 @@ class PostController extends Controller
     {
        $post = Post::all();
 
-       return response()->json($post, 201);
+       return response()->json($post);
     }
 
     /**
@@ -22,14 +24,9 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-      $post = new Post;
+      $post = Post::create($request->all());
 
-      $post->title = $request->title;
-      $post->content = $request->content;
-
-      $post->save();
-
-      return response()->json($post);
+      return response()->json($post, 201);
 
     }
 
@@ -38,7 +35,9 @@ class PostController extends Controller
      */
     public function show(string $id)
     {
-        //
+       $post = Post::find($id);
+
+       return response()->json($post);
     }
 
     /**
@@ -46,7 +45,14 @@ class PostController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $post = Post::find($id);
+
+        $post->title = $request->title;
+        $post->content = $request->content;
+  
+        $post->update();
+  
+        return response()->json($post, 201);   
     }
 
     /**
@@ -54,6 +60,17 @@ class PostController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try{
+
+        $post = Post::find($id);
+
+        $post->delete();
+
+        return response()->json(['message' => 'Post deleted'], 201);
+
+        }catch(Throwable $e){
+
+            return response()->json($e->getMessage(), 402);
+        }
     }
 }
